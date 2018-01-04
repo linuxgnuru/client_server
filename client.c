@@ -19,14 +19,15 @@
 #include <stdio.h>
 #include <math.h>
 #include <stdlib.h>
-#include <sys/time.h> /* For seed randomizer. */
+#include <time.h> // For seed randomizer.
 
 #define POWER "power"
-#define NOPOWER "nopwower"
+#define NOPOWER "nopower"
 #define LOCALHOST "localhost"
+#define SERVER "10.42.0.220"
 #define PORT "1974"
 
-main()
+int main(int argc, char **argv)
 {
   /* 
     Random number: power loss or not. 
@@ -35,46 +36,63 @@ main()
     send POWER.  This should allow more POWER
     than NOPOWER problems.) (JCW)
   */
- int randNum1=0;
- int randNum2=0;
- int sock;
- struct sockaddr_in server;
- struct hostent *hp, *gethostbyname();
- char buf[1024];
- /* Randomize seed. (JCW) */
- srandom(time(0));
- /* Create socket */
- sock = socket(AF_INET, SOCK_STREAM, 0);
- if (sock < 0) {
-  perror("opening stream socket");
-  exit(1);
- }
- /* Connect socket using name specified by command line. */
- server.sin_family = AF_INET;
- /* (JCW) Force ip to be local host; loopback. 
-    NOTE: This is only for this debuging version.
- */
- hp = gethostbyname(LOCALHOST);
- if (hp == 0) {
-  fprintf(stderr, "%s: unknown host\n", LOCALHOST);
-  exit(2);
- }
- bcopy(hp->h_addr, &server.sin_addr, hp->h_length);
- /* (JCW) Force port address.  (not really sure if this will work.)*/
- server.sin_port = htons(atoi(PORT));
- if (connect(sock, &server, sizeof(server)) < 0) {
-  perror("connecting stream socket");
-  exit(1);
- }
- /* Make two random numbers from 1 to 10. (JCW) */
- randNum1 = (random() % 10) + 1;
- randNum2 = (random() % 10) + 1;
- /* Power lost. (JCW) */
- if (randNum1 == randNum2)
-  if (write(sock, NOPOWER, sizeof(NOPOWER)) < 0)
-   perror("writing on stream socket");
- /* Power isn't lost. (JCW) */ 
- else if (write(sock, POWER, sizeof(POWER)) < 0)
-  perror("writing on stream socket");
- close(sock);
+  int randNum1=0;
+  int randNum2=0;
+  int sock;
+  struct sockaddr_in server;
+  struct hostent *hp, *gethostbyname();
+  char buf[1024];
+
+  // Randomize seed. (JCW)
+  srandom(time(NULL));
+  // Create socket
+  sock = socket(AF_INET, SOCK_STREAM, 0);
+  if (sock < 0)
+  {
+    perror("opening stream socket");
+    exit(1);
+  }
+  // Connect socket using name specified by command line.
+  server.sin_family = AF_INET;
+  // (JCW) Force ip to be local host; loopback.  NOTE: This is only for this debuging version.
+  hp = gethostbyname(SERVER);
+  if (hp == 0)
+  {
+    fprintf(stderr, "%s: unknown host\n", SERVER);
+    exit(2);
+  }
+  bcopy(hp->h_addr, &server.sin_addr, hp->h_length);
+  // (JCW) Force port address.  (not really sure if this will work.)
+  server.sin_port = htons(atoi(PORT));
+  if (connect(sock, &server, sizeof(server)) < 0)
+  {
+    perror("connecting stream socket");
+    exit(1);
+  }
+  // Make two random numbers from 1 to 10. (JCW)
+  //randNum1 = (random() % 10) + 1;
+  //randNum2 = (random() % 10) + 1;
+  randNum1 = (rand() % 10) + 1;
+  randNum2 = (rand() % 10) + 1;
+  //printf("rand1 %d rand2 %d\n", randNum1, randNum2);
+  // Power lost. (JCW)
+  if (randNum1 == randNum2)
+  {
+    printf("no power\n");
+    if (write(sock, NOPOWER, sizeof(NOPOWER)) < 0)
+    {
+      perror("writing on stream socket");
+    }
+  }
+  // Power isn't lost. (JCW)
+  else
+  {
+    printf("power\n");
+    if (write(sock, POWER, sizeof(POWER)) < 0)
+    {
+      perror("writing on stream socket");
+    }
+  }
+  close(sock);
+  return EXIT_SUCCESS;
 }
