@@ -24,7 +24,6 @@
 #define POWER "power"
 #define NOPOWER "nopower"
 #define LOCALHOST "localhost"
-#define SERVER "10.42.0.220"
 #define PORT "1974"
 
 int main(int argc, char **argv)
@@ -55,10 +54,10 @@ int main(int argc, char **argv)
   // Connect socket using name specified by command line.
   server.sin_family = AF_INET;
   // (JCW) Force ip to be local host; loopback.  NOTE: This is only for this debuging version.
-  hp = gethostbyname(SERVER);
+  hp = gethostbyname(LOCALHOST);
   if (hp == 0)
   {
-    fprintf(stderr, "%s: unknown host\n", SERVER);
+    fprintf(stderr, "%s: unknown host\n", LOCALHOST);
     exit(2);
   }
   bcopy(hp->h_addr, &server.sin_addr, hp->h_length);
@@ -70,11 +69,8 @@ int main(int argc, char **argv)
     exit(1);
   }
   // Make two random numbers from 1 to 10. (JCW)
-  //randNum1 = (random() % 10) + 1;
-  //randNum2 = (random() % 10) + 1;
   randNum1 = (rand() % 10) + 1;
   randNum2 = (rand() % 10) + 1;
-  //printf("rand1 %d rand2 %d\n", randNum1, randNum2);
   // Power lost. (JCW)
   if (randNum1 == randNum2)
   {
@@ -96,3 +92,4 @@ int main(int argc, char **argv)
   close(sock);
   return EXIT_SUCCESS;
 }
+

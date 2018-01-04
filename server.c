@@ -112,7 +112,6 @@ int main(int argc, char **argv)
                         }
                         else
                         {
-                            //printf("buf: [%s]\n", buf);
                             if (strcmp(buf, NOPOWER) == 0)
                             {
                                 printf("The system has lost power!  Shutting down!\n\a");
